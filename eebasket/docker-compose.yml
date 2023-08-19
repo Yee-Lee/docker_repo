@@ -2,9 +2,9 @@ version: '3.1'
 
 services:
 
-  db:
+  eebasket-db:
     image: mysql:5.7
-    container_name: eebasket_db
+    container_name: eebasket-db
     restart: always
     environment:
       MYSQL_DATABASE: wordpressdb
@@ -13,37 +13,44 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: '1'
     volumes:
       - db:/var/lib/mysql
+    networks:
+      - nginx
 
-  wordpress:
-    depends_on:
-      - db
+  eebasket-wordpress:
     image: wordpress
-    container_name: eebasket_wordpress
+    container_name: eebasket-wordpress
     restart: always
-    ports:
-      - 8089:80
     environment:
-      WORDPRESS_DB_HOST: eebasket_db:3306
+      WORDPRESS_DB_HOST: eebasket-db:3306
       WORDPRESS_DB_USER: ${MYSQL_USER}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: wordpressdb
     volumes:
       - wordpress:/var/www/html
+    depends_on:
+      - eebasket-db
+    networks:
+      - nginx
 
-  # nginx:
-  #  image: eecamp-wind-nginx
-  #  container_name: eecamp-wind-nginx
-  #  hostname: eecamp-wind-nginx
-  #  build:
-  #    context: ./nginx
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - "8085:80"
-  #  networks:
-  #    - nginx
-  #  depends_on:
-  #    - application
+  eebasket-nginx:
+    image: eebasket-nginx
+    container_name: eebasket-nginx
+    hostname: eebasket-nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    depends_on:
+      - eebasket-db
+      - eebasket-wordpress
+    ports:
+      - "8089:80"
+    networks:
+      - nginx
 
 volumes:
   wordpress:
   db:
+
+networks:
+  nginx:
+    external: true
