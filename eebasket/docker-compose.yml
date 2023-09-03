@@ -12,12 +12,12 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: '1'
     volumes:
-      - db:/var/lib/mysql
+      - ./volumes/db_data:/var/lib/mysql
     networks:
       - nginx
 
   eebasket-wordpress:
-    image: wordpress
+    image: wordpress:fpm-alpine
     container_name: eebasket-wordpress
     restart: always
     environment:
@@ -26,13 +26,15 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: wordpressdb
     volumes:
-      - wordpress:/var/www/html
+      - ./volumes/wordpress/root:/var/www/html
+      - ./volumes/wordpress/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     depends_on:
       - eebasket-db
     networks:
       - nginx
 
   eebasket-nginx:
+#    image: nginx:latest
     image: eebasket-nginx
     container_name: eebasket-nginx
     hostname: eebasket-nginx
@@ -40,16 +42,14 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     depends_on:
-      - eebasket-db
       - eebasket-wordpress
     ports:
       - "8089:80"
+    volumes:
+      - ./volumes/wordpress/root:/var/www/html
     networks:
       - nginx
 
-volumes:
-  wordpress:
-  db:
 
 networks:
   nginx:
