@@ -3,15 +3,16 @@
 # eebasket
 
 ## Environment
-* wordpress: 
+* wordpress:
     image: fpm-apline
     volume: mounted root in volumes/wordpress/
+    uploads.ini: mounted the config file.
 
 * mysql:
     image: latest
     volume: mounted database in volumes/db_data
 
-* nginx: 
+* nginx:
     (option-1)
     image: compiled by dockerfile
     volume: share the folder with the wordpress root
@@ -25,8 +26,11 @@
 * .env:
     The password and username used for mysql. You can modify this for your case after pull. 
 
-## Note
+## Deploy
+    1. > cd eebasket
+    2. > docker network create nginx
+    3. > docker-compose up -d
 
+## Note
     1. http://<your_site>:8089
     2. Wait few seconds wordpress copying files in the first launch.
-
